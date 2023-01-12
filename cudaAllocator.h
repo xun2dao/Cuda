@@ -16,7 +16,6 @@ class cudaAllocator{
 
   template<class ...Args>
   void construct(T* p, Args&& ...args){
-    std::cout<<"init data"<<std::endl;
     if constexpr (!(sizeof...(Args) == 0 && std::is_pod<T>::value))
       ::new((void*)p) T(std::forward<Args>(args)...);
   }

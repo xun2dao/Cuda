@@ -33,6 +33,18 @@ cudaMemcpy是一个隐含了同步的函数，方便我们编写代码。
 
 在现在的GPU上，已经出现了统一内存分配，我们可以通过cudaMallocManaged分配统一的内存地址。
 
+cuda的内存分配函数有多个:
+
++ cudaMalloc      ： 一维线性分配
++ cudaMallocPitch ： 二维padded分配
++ cudaMalloc3D    ： 三维分配
+
+
+cuda 中还有device全局变量，我们可以通过下面函数在全局变量和普通变量之间传递函数。
+全局变量的修饰符有 `__device__`， `__constant__`, `__managed`
+
+cudaMemcpyToSymbol(gvar, nvar, size);
+
 ## 4. 数组的遍历
 
 + 一个线程遍历整个数组
@@ -42,7 +54,7 @@ cudaMemcpy是一个隐含了同步的函数，方便我们编写代码。
 使用grid网格以及边角料问题 ：
 
 + 向上取整 + 判断
-+ 网格版本的跨步循环
++ 网格版本的跨步循环(跨步循环的本质是扁平化)
 
 跨步循环的好处就是可以完全不用考虑线程的数量，数据会自动分配到每个线程上。
 
@@ -73,5 +85,26 @@ class cudaAllocator{
   }
 };
 ```
-### nvcc 支持lambda和仿函数和模板
+### 4.2 nvcc 支持lambda和仿函数和模板
+如果需要nvcc支持lambda表达式，必须设置编译的选项`--extended-lambda`.
+nvcc 编译cuda代码的形式有三种:
+
+1. 离线编译 : nvcc现将device 代码转换为 PTX code 或者 binary code.然后将其插入host代码中，调用其他的编译器编译host代码。
+2. 即时编译(just-in-time), nvcc将device代码编程PTX code，在运行时，由驱动即时将PTX code转换为binary code。
+3. 运行时编译NVRTC? : 这种方式有点像解释器。
+
+
+## 5. cuda数学函数
+
+
+## 6. thrust库, 模拟c++ STL
+
+
+## 7. 原子操作
+
+## 8. cuda 运行时库
+cuda 运行时库会在第一个运行时库的非错误检查的函数被调用时初始化。由于cuda的函数需要
+cuda上下文(context),所以第一次调用的时候，就会创建一个cuda context，我们可以通过函数
+`cudaDeviceReset()`销毁当前正在使用的cuda context，之后的cuda库函数仍然会重新创建一个
+cuda上下文。
 
